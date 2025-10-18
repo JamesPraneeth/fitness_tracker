@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Fitness Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Dashboard</h1>
+        <h4 class="text-muted">{{ today.strftime('%B %d, %Y') }}</h4>
+    </div>
+
+    <!-- Macro Statistics Cards - ABOVE THE CHARTS -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card macro-card protein-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="fas fa-drumstick-bite"></i> Protein</h5>
+                    <h2 class="macro-value">{{ "%.1f"|format(total_protein) }}g</h2>
+                    <p class="text-muted">of {{ protein_goal }}g</p>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-danger" style="width: {{ ((total_protein/protein_goal*100)|int if total_protein/protein_goal*100 <= 100 else 100) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card macro-card carbs-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="fas fa-bread-slice"></i> Carbs</h5>
+                    <h2 class="macro-value">{{ "%.1f"|format(total_carbs) }}g</h2>
+                    <p class="text-muted">of {{ carbs_goal }}g</p>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" style="width: {{ ((total_carbs/carbs_goal*100)|int if total_carbs/carbs_goal*100 <= 100 else 100) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card macro-card fats-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="fas fa-cheese"></i> Fats</h5>
+                    <h2 class="macro-value">{{ "%.1f"|format(total_fats) }}g</h2>
+                    <p class="text-muted">of {{ fats_goal }}g</p>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-warning" style="width: {{ ((total_fats/fats_goal*100)|int if total_fats/fats_goal*100 <= 100 else 100) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Calories Progress</h5>
+                    <canvas id="calorieChart" width="1000" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Row -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Food Log</h5>
+                    {% if food_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Food</th>
+                                        <th>Calories</th>
+                                        <th>Protein</th>
+                                        <th>Carbs</th>
+                                        <th>Fats</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in food_logs %}
+                                    <tr>
+                                        <td>{{ log.name }}</td>
+                                        <td>{{ log.calories }}cal</td>
+                                        <td>{{ log.protein }}g</td>
+                                        <td>{{ log.carbs }}g</td>
+                                        <td>{{ log.fats }}g</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No food logged today</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Exercises</h5>
+                    {% if exercise_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Exercise</th>
+                                        <th>Sets</th>
+                                        <th>Weight x Reps</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in exercise_logs %}
+                                    <tr>
+                                        <td>{{ log.exercise_name }}</td>
+                                        <td>Set {{ log.set_number }}</td>
+                                        <td>{{ log.weight }}kg x {{ log.reps }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No exercises logged today</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Calorie Chart (Bar Chart)
+// Calorie Chart - Shows consumed and remaining
+const calorieCtx = document.getElementById('calorieChart').getContext('2d');
+const calorieChart = new Chart(calorieCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Calories'],
+        datasets: [
+            {
+                label: 'Consumed',
+                data: [{{ total_calories }}],
+                backgroundColor: '#28a745'
+            },
+            {
+                label: 'Remaining',
+                data: [Math.max(0, {{ calorie_goal }} - {{ total_calories }})],
+                backgroundColor: '#CCCCCC'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        scales: {
+            x: {
+                stacked: true,
+                beginAtZero: true,
+                max: {{ calorie_goal }}
+            },
+            y: {
+                stacked: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}AI Fitness Coach - Fitness Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">AI Fitness Coach</h1>
+        <a href="{{ url_for('ai_coach') }}" class="btn btn-primary">
+            <i class="fas fa-sync"></i> Get New Recommendations
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Personalized Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Based on your recent activity and goals:</p>
+                    
+                    {% for recommendation in recommendations %}
+                    <div class="alert alert-info">
+                        <strong>Tip {{ loop.index }}:</strong> {{ recommendation }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Your Current Stats</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Age:</strong> {{ current_user.age }} years</p>
+                    <p><strong>Height:</strong> {{ current_user.height }}cm</p>
+                    <p><strong>Weight:</strong> {{ current_user.weight }}kg</p>
+                    <hr>
+                    <p><strong>Daily Goals:</strong></p>
+                    <ul>
+                        <li>Calories: {{ current_user.calorie_goal }}</li>
+                        <li>Protein: {{ current_user.protein_goal }}g</li>
+                        <li>Carbs: {{ current_user.carbs_goal }}g</li>
+                        <li>Fats: {{ current_user.fats_goal }}g</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+{% endblock %}

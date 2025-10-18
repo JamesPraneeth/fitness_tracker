@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Food Tracker - Fitness Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-utensils text-warning"></i> Food Tracker</h1>
+        <a href="{{ url_for('profile_food_logs') }}" class="btn btn-outline-warning">
+            <i class="fas fa-history"></i> View All Logs
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Add Food Section -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> Add Food Entry
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ food_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ food_form.name.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-utensils"></i>
+                                </span>
+                                {{ food_form.name(class="form-control", placeholder="e.g., Chicken Breast") }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ food_form.calories.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-fire"></i>
+                                        </span>
+                                        {{ food_form.calories(class="form-control") }}
+                                        <span class="input-group-text">cal</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ food_form.protein.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-drumstick-bite"></i>
+                                        </span>
+                                        {{ food_form.protein(class="form-control") }}
+                                        <span class="input-group-text">g</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ food_form.carbs.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-bread-slice"></i>
+                                        </span>
+                                        {{ food_form.carbs(class="form-control") }}
+                                        <span class="input-group-text">g</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ food_form.fats.label(class="form-label") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-cheese"></i>
+                                        </span>
+                                        {{ food_form.fats(class="form-control") }}
+                                        <span class="input-group-text">g</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{ food_form.submit(class="btn btn-warning text-dark btn-lg w-100") }}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Body Weight Section -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-weight"></i> Log Body Weight
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ weight_form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ weight_form.weight.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-weight"></i>
+                                </span>
+                                {{ weight_form.weight(class="form-control") }}
+                                <span class="input-group-text">kg</span>
+                            </div>
+                        </div>
+                        {{ weight_form.submit(class="btn btn-info w-100") }}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Logs Section -->
+        <div class="col-md-6">
+            <!-- Food Log -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-day"></i> Today's Food Log
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if food_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th>Food</th>
+                                        <th>Calories</th>
+                                        <th>Protein</th>
+                                        <th>Carbs</th>
+                                        <th>Fats</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in food_logs %}
+                                    <tr>
+                                        <td><strong>{{ log.name }}</strong></td>
+                                        <td>
+                                            <span class="badge bg-danger">{{ log.calories }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ log.protein }}g</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ log.carbs }}g</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">{{ log.fats }}g</span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('delete_food', food_id=log.id) }}" 
+                                               class="btn btn-sm btn-outline-danger"
+                                               onclick="return confirm('Delete {{ log.name }}?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Daily Totals -->
+                        <div class="row mt-3 text-center">
+                            <div class="col-3">
+                                <h6 class="text-danger">Calories</h6>
+                                <span class="badge bg-danger">{{ food_logs|sum(attribute='calories') }}</span>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="text-info">Protein</h6>
+                                <span class="badge bg-info">{{ food_logs|sum(attribute='protein') }}g</span>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="text-primary">Carbs</h6>
+                                <span class="badge bg-primary">{{ food_logs|sum(attribute='carbs') }}g</span>
+                            </div>
+                            <div class="col-3">
+                                <h6 class="text-warning">Fats</h6>
+                                <span class="badge bg-warning text-dark">{{ food_logs|sum(attribute='fats') }}g</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-utensils fa-3x mb-3"></i>
+                            <p class="mb-0">Please enter your food log</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Weight History -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> Recent Body Weight
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if weight_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Weight</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in weight_logs[:10] %}
+                                    <tr>
+                                        <td>
+                                            <small>{{ log.date.strftime('%m/%d/%Y') }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-info">{{ log.weight }}kg</strong>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('delete_weight', weight_id=log.id) }}" 
+                                               class="btn btn-xs btn-outline-danger"
+                                               onclick="return confirm('Delete weight entry?')">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if weight_logs|length > 10 %}
+                        <div class="text-center mt-2">
+                            <a href="{{ url_for('profile_food_logs') }}" class="btn btn-sm btn-outline-info">
+                                View All {{ weight_logs|length }} Entries
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center text-muted py-3">
+                            <i class="fas fa-weight fa-2x mb-2"></i>
+                            <p class="mb-0">No weight logs recorded</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

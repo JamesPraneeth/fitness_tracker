@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Food Logs - Fitness Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-utensils text-warning"></i> Food Logs</h1>
+        <div>
+            <a href="{{ url_for('food_tracker') }}" class="btn btn-warning text-dark me-2">
+                <i class="fas fa-plus"></i> Add Food
+            </a>
+            <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Food Logs Section -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hamburger"></i> All Food Entries 
+                        {% if food_logs %}
+                            <span class="badge bg-dark">{{ food_logs|length }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if food_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="fas fa-calendar"></i> Date</th>
+                                        <th><i class="fas fa-utensils"></i> Food</th>
+                                        <th><i class="fas fa-fire"></i> Calories</th>
+                                        <th><i class="fas fa-drumstick-bite"></i> Protein</th>
+                                        <th><i class="fas fa-bread-slice"></i> Carbs</th>
+                                        <th><i class="fas fa-cheese"></i> Fats</th>
+                                        <th><i class="fas fa-tools"></i> Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in food_logs %}
+                                    <tr class="food-log-row" data-date="{{ log.date }}">
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                {{ log.date.strftime('%m/%d') }}
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">{{ log.date.strftime('%Y') }}</small>
+                                        </td>
+                                        <td>
+                                            <strong>{{ log.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> 
+                                                {{ log.created_at.strftime('%I:%M %p') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger">{{ log.calories }}</span>
+                                            <small class="text-muted d-block">cal</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ log.protein }}</span>
+                                            <small class="text-muted d-block">g</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ log.carbs }}</span>
+                                            <small class="text-muted d-block">g</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">{{ log.fats }}</span>
+                                            <small class="text-muted d-block">g</small>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('delete_food', food_id=log.id) }}" 
+                                               class="btn btn-sm btn-outline-danger"
+                                               onclick="return confirm('Delete {{ log.name }}?')"
+                                               title="Delete this food entry">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <p class="text-muted">
+                                <i class="fas fa-check-circle text-success"></i> 
+                                Showing {{ food_logs|length }} food entries
+                            </p>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-utensils fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Food Logs Yet</h4>
+                            <p class="text-muted">Start tracking your nutrition to see entries here</p>
+                            <a href="{{ url_for('food_tracker') }}" class="btn btn-warning text-dark">
+                                <i class="fas fa-plus"></i> Add Your First Food Entry
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Weight History Section -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-weight"></i> Body Weight History
+                        {% if weight_logs %}
+                            <span class="badge bg-light text-dark">{{ weight_logs|length }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if weight_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th><i class="fas fa-calendar"></i> Date</th>
+                                        <th><i class="fas fa-weight"></i> Weight</th>
+                                        <th><i class="fas fa-tools"></i> Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in weight_logs[:15] %} {# Show last 15 entries #}
+                                    <tr>
+                                        <td>
+                                            <small>{{ log.date.strftime('%m/%d/%y') }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-info">{{ log.weight }}kg</strong>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('delete_weight', weight_id=log.id) }}" 
+                                               class="btn btn-xs btn-outline-danger btn-sm"
+                                               onclick="return confirm('Delete weight entry: {{ log.weight }}kg?')"
+                                               title="Delete this weight entry">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+                                    {% if weight_logs|length > 15 %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">
+                                            <small class="text-muted">
+                                                ... and {{ weight_logs|length - 15 }} more entries
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% if weight_logs|length > 1 %}
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <small class="text-muted">
+                                <i class="fas fa-chart-line"></i> 
+                                <strong>Recent Change:</strong>
+                                {% set latest = weight_logs[0].weight %}
+                                {% set previous = weight_logs[1].weight %}
+                                {% set change = latest - previous %}
+                                {% if change > 0 %}
+                                    <span class="text-success">+{{ "%.1f"|format(change) }}kg</span>
+                                {% elif change < 0 %}
+                                    <span class="text-danger">{{ "%.1f"|format(change) }}kg</span>
+                                {% else %}
+                                    <span class="text-muted">No change</span>
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-weight fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No weight logs yet</p>
+                            <a href="{{ url_for('food_tracker') }}" class="btn btn-sm btn-info">
+                                <i class="fas fa-plus"></i> Add Weight
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.food-log-row:hover {
+    background-color: #f8f9fa;
+}
+
+.exercise-details .set-detail {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.stat-item {
+    padding: 10px;
+}
+</style>
+{% endblock %}

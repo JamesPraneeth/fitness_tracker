@@ -1,0 +1,225 @@
+/* Minimal CSS for Fitness Tracker */
+
+body {
+    background-color: #ffffff;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+/* Sidebar */
+.sidebar {
+    background: #343a40;
+    min-height: 100vh;
+    padding: 0;
+}
+
+.sidebar-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-brand {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #495057;
+}
+
+.sidebar .nav-link {
+    color: #adb5bd;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+    background: #495057;
+    color: #fff;
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.sidebar .nav-link i {
+    margin-right: 0.75rem;
+}
+
+.profile-section {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #495057;
+}
+
+.profile-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    color: #adb5bd;
+    padding: 0.75rem;
+}
+
+.profile-info:hover {
+    background: #495057;
+}
+
+.profile-icon {
+    font-size: 2rem;
+    margin-right: 0.75rem;
+}
+
+.profile-name {
+    font-size: 1rem;
+}
+
+/* Main Content */
+.main-content {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+/* Cards */
+.card {
+    border: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+    background: #ffffff;
+}
+
+.card-title {
+    color: #495057;
+    font-weight: bold;
+}
+
+/* Macro Cards */
+.macro-card {
+    border-left: 4px solid;
+}
+
+.protein-card {
+    border-left-color: #FF6384;
+}
+
+.carbs-card {
+    border-left-color: #36A2EB;
+}
+
+.fats-card {
+    border-left-color: #FFCE56;
+}
+
+.macro-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+/* Profile Cards */
+.profile-menu-card {
+    cursor: pointer;
+    height: 100%;
+    border: 1px solid #dee2e6;
+}
+
+.profile-menu-card:hover {
+    background: #f8f9fa;
+}
+
+.profile-menu-icon {
+    font-size: 3rem;
+}
+
+.workout-card .profile-menu-icon {
+    color: #28a745;
+}
+
+.food-card .profile-menu-icon {
+    color: #ffc107;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.5rem 1rem;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+/* Tables */
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Workout Timer */
+#workout-timer h3 {
+    color: #28a745;
+}
+
+#timer-display {
+    font-family: monospace;
+    background: #28a745;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.5rem;
+    display: inline-block;
+}
+
+/* Rest Timer */
+.rest-timer-alert {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    padding: 1rem;
+}
+
+#rest-timer-display {
+    font-family: monospace;
+    font-size: 1.5rem;
+    color: #fd7e14;
+}
+
+/* Progress Bars */
+.progress {
+    height: 0.75rem;
+}
+
+/* Forms */
+.form-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+    
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .sidebar-content {
+        height: auto;
+        padding: 1rem;
+    }
+}

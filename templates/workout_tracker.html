@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Workout Tracker - Fitness Tracker{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4"><i class="fas fa-dumbbell"></i> Workout Tracker</h1>
+    
+    <!-- Timer and Finish Button - OUTSIDE ANY CARD -->
+    <div id="workout-controls" style="background-color: #f8f9fa; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+        <button id="start-workout-btn" class="btn btn-success btn-lg">
+            <i class="fas fa-play"></i> Start Workout
+        </button>
+        
+        <div id="workout-timer" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="text-success mb-0">
+                        <i class="fas fa-stopwatch"></i> Workout Timer: 
+                        <span id="timer-display" style="font-family: monospace; font-size: 2rem;">00:00:00</span>
+                    </h3>
+                </div>
+                <button id="finish-workout-btn" class="btn btn-danger btn-lg">
+                    <i class="fas fa-stop"></i> Finish Workout
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exercise Cards Container -->
+    <div id="exercise-cards-container" style="display: none;">
+        <h4 class="mb-3"><i class="fas fa-plus-circle"></i> Log Exercises</h4>
+        
+        <!-- Exercise Card 1 (Default) -->
+        <div class="card exercise-card mb-3" data-exercise-num="1">
+            <div class="card-header">
+                <h5 class="mb-0">Exercise 1</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Exercise Name</label>
+                        <input type="text" class="form-control exercise-name" placeholder="e.g., Bench Press">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Rest Time (seconds)</label>
+                        <input type="number" class="form-control rest-timer-input" value="60" min="10" max="600">
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" class="form-control exercise-weight" placeholder="Weight" step="0.5">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Reps</label>
+                        <input type="number" class="form-control exercise-reps" placeholder="Reps" min="1">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary add-set-btn" style="margin-bottom: 0;">
+                            <i class="fas fa-plus"></i> Add Set
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Rest Timer Alert -->
+                <div class="rest-timer-container" style="display: none;">
+                    <div class="alert alert-warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <i class="fas fa-hourglass-half"></i> Rest Timer: 
+                                    <span class="rest-timer-display">60</span> seconds
+                                </h5>
+                            </div>
+                            <button class="btn btn-sm btn-secondary skip-rest-btn">
+                                <i class="fas fa-forward"></i> Skip Rest
+                            </button>
+                        </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="rest-progress-bar progress-bar bg-warning" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Exercise Button -->
+        <button id="add-exercise-btn" class="btn btn-success btn-lg mb-4">
+            <i class="fas fa-plus-circle"></i> Add Another Exercise
+        </button>
+    </div>
+    
+    <!-- Current Workout Table - SEPARATE CARD -->
+    <div id="current-workout-card" style="display: none;">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Current Workout</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="current-workout-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="fas fa-dumbbell"></i> Exercise</th>
+                                <th><i class="fas fa-hashtag"></i> Sets</th>
+                                <th><i class="fas fa-info-circle"></i> Details</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentSessionId = null;
+let workoutTimer = null;
+let startTime = null;
+let currentExerciseSets = {};
+let exerciseCounter = 1;
+
+// Start Workout Button
+document.getElementById('start-workout-btn').addEventListener('click', function() {
+    fetch('/start-workout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        currentSessionId = data.session_id;
+        startWorkoutTimer();
+        
+        // Show workout interface
+        document.getElementById('start-workout-btn').style.display = 'none';
+        document.getElementById('workout-timer').style.display = 'block';
+        document.getElementById('exercise-cards-container').style.display = 'block';
+        document.getElementById('current-workout-card').style.display = 'block';
+    });
+});
+
+// Add Exercise Button
+document.getElementById('add-exercise-btn').addEventListener('click', function() {
+    exerciseCounter++;
+    addNewExerciseCard(exerciseCounter);
+});
+
+// Function to add new exercise card
+function addNewExerciseCard(num) {
+    const container = document.getElementById('exercise-cards-container');
+    const addBtn = document.getElementById('add-exercise-btn');
+    
+    const newCard = document.createElement('div');
+    newCard.className = 'card exercise-card mb-3';
+    newCard.setAttribute('data-exercise-num', num);
+    newCard.innerHTML = `
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Exercise ${num}</h5>
+            <button class="btn btn-sm btn-danger remove-exercise-btn">
+                <i class="fas fa-times"></i> Remove
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Exercise Name</label>
+                    <input type="text" class="form-control exercise-name" placeholder="e.g., Squats">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Rest Time (seconds)</label>
+                    <input type="number" class="form-control rest-timer-input" value="60" min="10" max="600">
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Weight (kg)</label>
+                    <input type="number" class="form-control exercise-weight" placeholder="Weight" step="0.5">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Reps</label>
+                    <input type="number" class="form-control exercise-reps" placeholder="Reps" min="1">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary add-set-btn" style="margin-bottom: 0;">
+                        <i class="fas fa-plus"></i> Add Set
+                    </button>
+                </div>
+            </div>
+            
+            <div class="rest-timer-container" style="display: none;">
+                <div class="alert alert-warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <i class="fas fa-hourglass-half"></i> Rest Timer: 
+                                <span class="rest-timer-display">60</span> seconds
+                            </h5>
+                        </div>
+                        <button class="btn btn-sm btn-secondary skip-rest-btn">
+                            <i class="fas fa-forward"></i> Skip Rest
+                        </button>
+                    </div>
+                    <div class="progress mt-2" style="height: 8px;">
+                        <div class="rest-progress-bar progress-bar bg-warning" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertBefore(newCard, addBtn);
+    attachCardEventListeners(newCard);
+}
+
+// Attach event listeners to exercise cards
+function attachCardEventListeners(card) {
+    // Add Set button
+    const addSetBtn = card.querySelector('.add-set-btn');
+    addSetBtn.addEventListener('click', function() {
+        handleAddSet(card);
+    });
+    
+    // Skip Rest button
+    const skipRestBtn = card.querySelector('.skip-rest-btn');
+    skipRestBtn.addEventListener('click', function() {
+        stopRestTimer(card);
+    });
+    
+    // Remove Exercise button (if exists)
+    const removeBtn = card.querySelector('.remove-exercise-btn');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+            if (confirm('Remove this exercise?')) {
+                card.remove();
+            }
+        });
+    }
+}
+
+// Initialize first card event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const firstCard = document.querySelector('.exercise-card');
+    if (firstCard) {
+        attachCardEventListeners(firstCard);
+    }
+});
+
+// Handle Add Set
+function handleAddSet(card) {
+    const exerciseName = card.querySelector('.exercise-name').value.trim();
+    const weight = parseFloat(card.querySelector('.exercise-weight').value);
+    const reps = parseInt(card.querySelector('.exercise-reps').value);
+    const restTime = parseInt(card.querySelector('.rest-timer-input').value) || 60;
+    
+    if (!exerciseName || !weight || !reps) {
+        alert('Please fill in Exercise Name, Weight, and Reps');
+        return;
+    }
+    
+    if (!currentExerciseSets[exerciseName]) {
+        currentExerciseSets[exerciseName] = 0;
+    }
+    currentExerciseSets[exerciseName]++;
+    
+    fetch('/add-exercise', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            session_id: currentSessionId,
+            exercise_name: exerciseName,
+            weight: weight,
+            reps: reps,
+            set_number: currentExerciseSets[exerciseName]
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateCurrentWorkoutLog(exerciseName, weight, reps, currentExerciseSets[exerciseName]);
+        
+        // Clear weight and reps
+        card.querySelector('.exercise-weight').value = '';
+        card.querySelector('.exercise-reps').value = '';
+        
+        // Start rest timer
+        startRestTimer(card, restTime);
+    });
+}
+
+// Finish Workout Button
+document.getElementById('finish-workout-btn').addEventListener('click', function() {
+    const duration = Math.floor((Date.now() - startTime) / 60000);
+    
+    fetch('/finish-workout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            session_id: currentSessionId,
+            duration: duration
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Workout finished! Duration: ' + duration + ' minutes\\n\\nGreat job! 💪');
+        window.location.href = '{{ url_for("profile_workout_history") }}';
+    });
+});
+
+// Workout Timer Functions
+function startWorkoutTimer() {
+    startTime = Date.now();
+    workoutTimer = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    const elapsed = Date.now() - startTime;
+    const hours = Math.floor(elapsed / 3600000);
+    const minutes = Math.floor((elapsed % 3600000) / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    
+    document.getElementById('timer-display').textContent = 
+        String(hours).padStart(2, '0') + ':' + 
+        String(minutes).padStart(2, '0') + ':' + 
+        String(seconds).padStart(2, '0');
+}
+
+// Rest Timer Functions
+function startRestTimer(card, seconds) {
+    let timeRemaining = seconds;
+    const totalRestTime = seconds;
+    
+    const restContainer = card.querySelector('.rest-timer-container');
+    const restDisplay = card.querySelector('.rest-timer-display');
+    const progressBar = card.querySelector('.rest-progress-bar');
+    const addSetBtn = card.querySelector('.add-set-btn');
+    
+    restDisplay.textContent = timeRemaining;
+    restContainer.style.display = 'block';
+    addSetBtn.disabled = true;
+    addSetBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Resting...';
+    
+    const restInterval = setInterval(function() {
+        timeRemaining--;
+        restDisplay.textContent = timeRemaining;
+        
+        const progressPercent = (timeRemaining / totalRestTime) * 100;
+        progressBar.style.width = progressPercent + '%';
+        
+        if (timeRemaining <= 0) {
+            clearInterval(restInterval);
+            stopRestTimer(card);
+            alert('⏰ Rest is over! Time for your next set! 💪');
+        }
+    }, 1000);
+    
+    // Store interval reference for skip functionality
+    card.restInterval = restInterval;
+}
+
+function stopRestTimer(card) {
+    if (card.restInterval) {
+        clearInterval(card.restInterval);
+    }
+    
+    const restContainer = card.querySelector('.rest-timer-container');
+    const progressBar = card.querySelector('.rest-progress-bar');
+    const addSetBtn = card.querySelector('.add-set-btn');
+    
+    restContainer.style.display = 'none';
+    addSetBtn.disabled = false;
+    addSetBtn.innerHTML = '<i class="fas fa-plus"></i> Add Set';
+    progressBar.style.width = '100%';
+}
+
+// Update Current Workout Log
+function updateCurrentWorkoutLog(exerciseName, weight, reps, setNumber) {
+    const tableBody = document.querySelector('#current-workout-table tbody');
+    let exerciseRow = document.querySelector(`tr[data-exercise="${exerciseName}"]`);
+    
+    if (!exerciseRow) {
+        exerciseRow = document.createElement('tr');
+        exerciseRow.setAttribute('data-exercise', exerciseName);
+        exerciseRow.innerHTML = `
+            <td><strong><i class="fas fa-dumbbell text-primary"></i> ${exerciseName}</strong></td>
+            <td><span class="badge bg-primary set-count">1</span></td>
+            <td class="set-details">${weight}kg × ${reps}</td>
+        `;
+        tableBody.appendChild(exerciseRow);
+    } else {
+        const setCountBadge = exerciseRow.querySelector('.set-count');
+        setCountBadge.textContent = setNumber;
+        
+        const detailsCell = exerciseRow.querySelector('.set-details');
+        detailsCell.innerHTML += ` | ${weight}kg × ${reps}`;
+    }
+    
+    exerciseRow.classList.add('table-success');
+    setTimeout(() => {
+        exerciseRow.classList.remove('table-success');
+    }, 1000);
+}
+</script>
+{% endblock %}
