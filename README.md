@@ -75,6 +75,8 @@ fitness_tracker/
 ---
 **Video Demo of the App**
 
+[Watch the video](https://github.com/JamesPraneeth/fitness_tracker/blob/main/media/demo.mp4)
+
 
 Author
 
