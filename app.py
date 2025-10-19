@@ -30,7 +30,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# ==================== MODELS====================
+# ==================== MODELS ====================
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -106,7 +106,7 @@ class BodyWeightLog(db.Model):
     def __repr__(self):
         return f'<BodyWeightLog {self.weight}kg>'
 
-# ==================== ADMIN VIEWS (FIXED FOR 2025) ====================
+# ==================== ADMIN VIEWS ====================
 
 class SecureModelView(ModelView):
     def is_accessible(self):
@@ -360,7 +360,7 @@ def calculate_user_macros(user):
         'fats': round(fats_goal, 1)
     }
 
-# ==================== USER LOADER (UPDATED FOR SQLAlchemy 2.0) ====================
+# ==================== USER LOADER ====================
 
 @login_manager.user_loader
 def load_user(user_id):
