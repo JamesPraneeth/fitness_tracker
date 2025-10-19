@@ -654,9 +654,6 @@ def ai_coach():
 @login_required
 def settings():
     if request.method == 'POST':
-        current_user.age = int(request.form.get('age'))
-        current_user.gender = request.form.get('gender')
-        current_user.height = float(request.form.get('height'))
         current_user.weight = float(request.form.get('weight'))
         current_user.activity_level = request.form.get('activity_level')
         current_user.goal = request.form.get('goal')
