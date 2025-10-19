@@ -78,7 +78,7 @@ fitness_tracker/
 
 Author
 
-Developed by James Praneeth
+Developed by Praneeth
 
 License
 
