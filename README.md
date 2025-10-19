@@ -75,7 +75,7 @@ fitness_tracker/
 ---
 **Video Demo of the App**
 
-[Watch the video](https://github.com/JamesPraneeth/fitness_tracker/blob/main/media/demo.mp4)
+[Watch the video](https://github.com/JamesPraneeth/fitness_tracker/blob/main/media/Login - Fitness Tracker - Personal - Microsoft_ Edge Beta 2025-10-19 14-18-51.mp4)
 
 
 Author
