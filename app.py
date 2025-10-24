@@ -226,9 +226,8 @@ class BodyWeightForm(FlaskForm):
     weight = FloatField('Weight (kg)', validators=[InputRequired()])
     submit = SubmitField('Add Weight')
 
-
+# ==================== MACRO CALCULATOR ====================
 def get_ai_recommendations(user):
-    """Get personalized AI recommendations"""
     today = date.today()
     week_ago = today - timedelta()
 
